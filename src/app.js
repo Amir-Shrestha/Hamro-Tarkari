@@ -40,6 +40,48 @@ app.get("/login", (req, res) => {
     res.render("login")
 })
 
+//create new user in database
+app.post("/register", async (req, res) => {
+    try {
+        const password = req.body.password;
+        const confirmPassword = req.body.cpassword;
+        if( password === confirmPassword ){
+            const registerUserObj = new UserModelCollectionClass({
+                username: req.body.username,
+                mobile: req.body.mobile,
+                email: req.body.email,
+                address: req.body.address,
+                password: req.body.password,
+                role: "customer"
+            })
+            const newUserRegistered = await registerUserObj.save();
+            res.status(201).render("home")
+        }else{
+            res.send("Password and Confirm Password doesn't match !")
+        }
+    } catch (error) {
+        res.status(400).send(error)
+    }
+})
+
+// login validation
+app.post("/login", async (req, res) => {
+    try {
+        const formEmail = req.body.email;
+        const formPassword = req.body.password;
+        const fetchedUserDocument = await UserModelCollectionClass.findOne({email: formEmail});
+        if(fetchedUserDocument.password === formPassword){
+            console.log("Email and Password matched!")
+            res.status(201).render("home")
+        }else{
+            console.log("Email and Password not matched!")
+            res.send("not logged")
+        }
+    } catch (error) {
+        res.status(400).send("Invalid LogIn credentials!,",error)
+    }
+})
+
 // alt index
 app.use(express.static(staticPath));
 
