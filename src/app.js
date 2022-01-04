@@ -1,6 +1,7 @@
 const express = require('express');
 const path = require('path');
 const hbs = require('hbs');
+const bcrypt = require("bcryptjs")
 
 require("./db/conn.js")
 const UserModelCollectionClass = require("./models/userSchema")
@@ -54,6 +55,9 @@ app.post("/register", async (req, res) => {
                 password: req.body.password,
                 role: "customer"
             })
+
+            // midddleware to hashpassword in userSchema.js
+
             const newUserRegistered = await registerUserObj.save();
             res.status(201).render("home")
         }else{
@@ -70,7 +74,11 @@ app.post("/login", async (req, res) => {
         const formEmail = req.body.email;
         const formPassword = req.body.password;
         const fetchedUserDocument = await UserModelCollectionClass.findOne({email: formEmail});
-        if(fetchedUserDocument.password === formPassword){
+        const passwordMatch = await bcrypt.compare(formPassword, fetchedUserDocument.password)
+        console.log(passwordMatch)
+        console.log(formPassword)
+        console.log(fetchedUserDocument.password)
+        if(passwordMatch){
             console.log("Email and Password matched!")
             res.status(201).render("home")
         }else{
