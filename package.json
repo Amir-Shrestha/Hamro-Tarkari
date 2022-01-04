@@ -1,0 +1,18 @@
+{
+  "name": "hamro-tarkari-package",
+  "version": "1.0.0",
+  "description": "This node setup for hamro tarkari project.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "devServer": "nodemon src/app.js"
+  },
+  "author": "Amir Hero",
+  "license": "ISC",
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "express": "^4.17.2",
+    "hbs": "^4.2.0",
+    "mongoose": "^6.1.4"
+  }
+}
