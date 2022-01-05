@@ -2,6 +2,7 @@ const express = require('express');
 const path = require('path');
 const hbs = require('hbs');
 const bcrypt = require("bcryptjs")
+// const jwt = require("jsonwebtoken")
 
 require("./db/conn.js")
 const UserModelCollectionClass = require("./models/userSchema")
@@ -56,14 +57,21 @@ app.post("/register", async (req, res) => {
                 role: "customer"
             })
 
-            // midddleware to hashpassword in userSchema.js
+            // pre midddleware to hashpassword in userSchema.js
+
+            // midddleware to generate token.
+            const token = await registerUserObj.generateToken();
+            console.log(token)
 
             const newUserRegistered = await registerUserObj.save();
+            console.log(newUserRegistered)
             res.status(201).render("home")
+
         }else{
             res.send("Password and Confirm Password doesn't match !")
         }
     } catch (error) {
+        console.log("Error: ", error)
         res.status(400).send(error)
     }
 })
