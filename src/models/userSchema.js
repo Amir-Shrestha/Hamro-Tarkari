@@ -50,6 +50,7 @@ const jwt = require("jsonwebtoken");
     // (generateToken as middleware) to generate tokens
     userSchemaObj.methods.generateToken = async function(){
         try {
+            // console.log(this._id);
             const tokenCreated = await jwt.sign({_id: this._id.toString()}, process.env.SECRET_KEY) // this means userSchemaObj:schema
             this.tokens = this.tokens.concat({token: tokenCreated});
             await this.save();

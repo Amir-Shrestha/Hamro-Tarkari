@@ -9,7 +9,7 @@ require("./db/conn.js")
 const UserModelCollectionClass = require("./models/userSchema")
 
 const app = express();
-const port = 3006;
+const port = process.env.PORT || 3006;
 const staticPath = path.join(__dirname, "../public");
 const viewsPath = path.join(__dirname, "../templates/views");
 const partialsPath = path.join(__dirname, "../templates/partials");
@@ -61,8 +61,12 @@ app.post("/register", async (req, res) => {
             // pre midddleware to hashpassword in userSchema.js
 
             // midddleware to generate token.
-            const token = await registerUserObj.generateToken();
-            console.log(token)
+            const tokenCreated = await registerUserObj.generateToken();
+            // store token in cookies.
+            res.cookie("jwt", tokenCreated, {
+                expires: new Date(Date.now() + 30000),
+                httpOnly: true
+            });
 
             const newUserRegistered = await registerUserObj.save();
             console.log(newUserRegistered)
@@ -84,9 +88,15 @@ app.post("/login", async (req, res) => {
         const formPassword = req.body.password;
         const fetchedUserDocument = await UserModelCollectionClass.findOne({email: formEmail});
         const passwordMatch = await bcrypt.compare(formPassword, fetchedUserDocument.password)
-        console.log(passwordMatch)
-        console.log(formPassword)
-        console.log(fetchedUserDocument.password)
+
+        // midddleware to generate token.
+        const tokenCreated = await fetchedUserDocument.generateToken();
+        // store token in cookies.
+        res.cookie("jwt", tokenCreated, {
+            expires: new Date(Date.now() + 30000),
+            httpOnly: true
+        });
+
         if(passwordMatch){
             console.log("Email and Password matched!")
             res.status(201).render("home")
