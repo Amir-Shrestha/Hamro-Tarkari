@@ -2,11 +2,12 @@ require('dotenv').config()
 const express = require('express');
 const path = require('path');
 const hbs = require('hbs');
-const bcrypt = require("bcryptjs")
-// const jwt = require("jsonwebtoken")
+const bcrypt = require("bcryptjs");
+const cookieParser = require("cookie-parser");
 
 require("./db/conn.js")
 const UserModelCollectionClass = require("./models/userSchema")
+const auth = require("./middleware/auth")
 
 const app = express();
 const port = process.env.PORT || 3006;
@@ -14,6 +15,7 @@ const staticPath = path.join(__dirname, "../public");
 const viewsPath = path.join(__dirname, "../templates/views");
 const partialsPath = path.join(__dirname, "../templates/partials");
 
+app.use(cookieParser())
 // get form data
 app.use(express.urlencoded({extended: false}));
 
@@ -63,8 +65,8 @@ app.post("/register", async (req, res) => {
             // midddleware to generate token.
             const tokenCreated = await registerUserObj.generateToken();
             // store token in cookies.
-            res.cookie("jwt", tokenCreated, {
-                expires: new Date(Date.now() + 30000),
+            res.cookie("myJwt", tokenCreated, {
+                expires: new Date(Date.now() + 60000),
                 httpOnly: true
             });
 
@@ -92,9 +94,10 @@ app.post("/login", async (req, res) => {
         // midddleware to generate token.
         const tokenCreated = await fetchedUserDocument.generateToken();
         // store token in cookies.
-        res.cookie("jwt", tokenCreated, {
-            expires: new Date(Date.now() + 30000),
-            httpOnly: true
+        res.cookie("myJwt", tokenCreated, {
+            // expires: new Date(Date.now() + 60000),
+            httpOnly: true,
+            // secure: true
         });
 
         if(passwordMatch){
@@ -107,6 +110,11 @@ app.post("/login", async (req, res) => {
     } catch (error) {
         res.status(400).send("Invalid LogIn credentials!,",error)
     }
+})
+
+app.get("/dashboard", auth, (req, res) => {
+    console.log(`This the jwt retirved/parse from cookie: ${req.cookies.myJwt}`)
+    res.render("dashboard")
 })
 
 // alt index

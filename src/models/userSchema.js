@@ -51,7 +51,7 @@ const jwt = require("jsonwebtoken");
     userSchemaObj.methods.generateToken = async function(){
         try {
             // console.log(this._id);
-            const tokenCreated = await jwt.sign({_id: this._id.toString()}, process.env.SECRET_KEY) // this means userSchemaObj:schema
+            const tokenCreated = await jwt.sign({_id: this._id.toString()}, process.env.SECRET_KEY) // this means fetchedUserDocument
             this.tokens = this.tokens.concat({token: tokenCreated});
             await this.save();
             return tokenCreated;
