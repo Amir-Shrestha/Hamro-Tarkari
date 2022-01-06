@@ -102,7 +102,7 @@ app.post("/login", async (req, res) => {
 
         if(passwordMatch){
             console.log("Email and Password matched!")
-            res.status(201).render("home")
+            res.status(201).redirect("dashboard")
         }else{
             console.log("Email and Password not matched!")
             res.send("not logged")
@@ -115,6 +115,25 @@ app.post("/login", async (req, res) => {
 app.get("/dashboard", auth, (req, res) => {
     console.log(`This the jwt retirved/parse from cookie: ${req.cookies.myJwt}`)
     res.render("dashboard")
+})
+
+app.get("/logout", auth, async(req, res) => {
+    try {
+        res.clearCookie("myJwt");
+        req.user.tokens = req.user.tokens.filter((tokenObj)=> tokenObj.token != req.cookieToken)
+        // console.log('ttttttttttt',req.user.tokens)
+        // console.log('uuuuuuuuuuu',req.user)
+        const x = await req.user.save();
+        console.log(x);
+        console.log("Log Out !")
+        res.redirect("login");
+    } catch (error) {
+        res.status(400).send(error)
+    }
+})
+
+app.get("/innerpage", auth, (req, res) => {
+    res.send("<h1>Innerpage</h1> <a href='/dashboard'>DashBoard</a>")
 })
 
 // alt index
