@@ -72,7 +72,7 @@ app.post("/register", async (req, res) => {
 
             const newUserRegistered = await registerUserObj.save();
             console.log(newUserRegistered)
-            res.status(201).render("home")
+            res.status(201).redirect("dashboard")
 
         }else{
             res.send("Password and Confirm Password doesn't match !")
@@ -114,7 +114,7 @@ app.post("/login", async (req, res) => {
 
 app.get("/dashboard", auth, (req, res) => {
     console.log(`This the jwt retirved/parse from cookie: ${req.cookies.myJwt}`)
-    res.render("dashboard")
+    res.render("dashboard",{user:req.user})
 })
 
 app.get("/logout", auth, async(req, res) => {
