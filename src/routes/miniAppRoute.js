@@ -12,80 +12,82 @@ router.get("/service", (req, res) => {
     res.render("service")
 })
 
-router.get("/register", (req, res) => {
-    res.render("register")
-})
+// Usre Registration
+router.route("/register")
+    .get((req, res) => {
+        res.render("register")
+    })
+    .post( async (req, res) => {
+        try {
+            const password = req.body.password;
+            const confirmPassword = req.body.cpassword;
+            if( password === confirmPassword ){
+                const registerUserObj = new UserModelCollectionClass({
+                    username: req.body.username,
+                    mobile: req.body.mobile,
+                    email: req.body.email,
+                    address: req.body.address,
+                    password: req.body.password,
+                    role: "customer"
+                })
 
-router.get("/login", (req, res) => {
-    res.render("login")
-})
+                // pre midddleware to hashpassword in userSchema.js
 
-//create new user in database
-router.post("/register", async (req, res) => {
-    try {
-        const password = req.body.password;
-        const confirmPassword = req.body.cpassword;
-        if( password === confirmPassword ){
-            const registerUserObj = new UserModelCollectionClass({
-                username: req.body.username,
-                mobile: req.body.mobile,
-                email: req.body.email,
-                address: req.body.address,
-                password: req.body.password,
-                role: "customer"
-            })
+                // midddleware to generate token.
+                const tokenCreated = await registerUserObj.generateToken();
+                // store token in cookies.
+                res.cookie("myJwt", tokenCreated, {
+                    expires: new Date(Date.now() + 60000),
+                    httpOnly: true
+                });
 
-            // pre midddleware to hashpassword in userSchema.js
+                const newUserRegistered = await registerUserObj.save();
+                console.log(newUserRegistered)
+                res.status(201).redirect("dashboard")
+
+            }else{
+                res.send("Password and Confirm Password doesn't match !")
+            }
+        } catch (error) {
+            console.log("Error: ", error)
+            res.status(400).send(error)
+        }
+    })
+
+// User Login
+router.route("/login")
+    .get((req, res) => {
+        res.render("login")
+    })
+    .post( async (req, res) => {
+        try {
+            const formEmail = req.body.email;
+            const formPassword = req.body.password;
+            const fetchedUserDocument = await UserModelCollectionClass.findOne({email: formEmail});
+            const passwordMatch = await bcrypt.compare(formPassword, fetchedUserDocument.password)
 
             // midddleware to generate token.
-            const tokenCreated = await registerUserObj.generateToken();
+            const tokenCreated = await fetchedUserDocument.generateToken();
             // store token in cookies.
             res.cookie("myJwt", tokenCreated, {
-                expires: new Date(Date.now() + 60000),
-                httpOnly: true
+                // expires: new Date(Date.now() + 60000),
+                httpOnly: true,
+                // secure: true
             });
 
-            const newUserRegistered = await registerUserObj.save();
-            console.log(newUserRegistered)
-            res.status(201).redirect("dashboard")
-
-        }else{
-            res.send("Password and Confirm Password doesn't match !")
+            if(passwordMatch){
+                console.log("Email and Password matched!")
+                res.status(201).redirect("dashboard")
+            }else{
+                console.log("Email and Password not matched!")
+                res.send("not logged")
+            }
+        } catch (error) {
+            res.status(400).send("Invalid LogIn credentials!,",error)
         }
-    } catch (error) {
-        console.log("Error: ", error)
-        res.status(400).send(error)
-    }
-})
+    })
 
-// login validation
-router.post("/login", async (req, res) => {
-    try {
-        const formEmail = req.body.email;
-        const formPassword = req.body.password;
-        const fetchedUserDocument = await UserModelCollectionClass.findOne({email: formEmail});
-        const passwordMatch = await bcrypt.compare(formPassword, fetchedUserDocument.password)
 
-        // midddleware to generate token.
-        const tokenCreated = await fetchedUserDocument.generateToken();
-        // store token in cookies.
-        res.cookie("myJwt", tokenCreated, {
-            // expires: new Date(Date.now() + 60000),
-            httpOnly: true,
-            // secure: true
-        });
-
-        if(passwordMatch){
-            console.log("Email and Password matched!")
-            res.status(201).redirect("dashboard")
-        }else{
-            console.log("Email and Password not matched!")
-            res.send("not logged")
-        }
-    } catch (error) {
-        res.status(400).send("Invalid LogIn credentials!,",error)
-    }
-})
 
 router.get("/dashboard", auth, (req, res) => {
     console.log(`This the jwt retirved/parse from cookie: ${req.cookies.myJwt}`)
