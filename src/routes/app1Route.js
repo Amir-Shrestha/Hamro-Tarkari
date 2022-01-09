@@ -1,8 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const auth = require("../middleware/auth");
-const logAuth = require("../middleware/logAuth");
-
+const authentication = require("../middleware/authentication");
+const validation = require("../middleware/validation");
 const authContoller = require("../controllers/app1Controller")
 
 router.get("/", (req, res) => {
@@ -20,24 +19,24 @@ router.get("/service", (req, res) => {
 // Usre Registration
 router
   .route("/register")
-  .get(logAuth, authContoller.userRegistrationGet)
-  .post(logAuth, authContoller.userRegistrationPost);
+  .get(authentication.logAuth, authContoller.userRegistrationGet)
+  .post(authentication.logAuth, validation, authContoller.userRegistrationPost);
 
 // User LogIn
 router
   .route("/login")
-  .get(logAuth, authContoller.userLoginGet)
-  .post(logAuth, authContoller.userLoginPost);
+  .get(authentication.logAuth, authContoller.userLoginGet)
+  .post(authentication.logAuth, authContoller.userLoginPost);
 
-router.get("/dashboard", auth, (req, res) => {
+router.get("/dashboard", authentication.auth, (req, res) => {
   res.render("dashboard", { username: req.user.username });
 });
 
-router.get("/innerpage", auth, (req, res) => {
+router.get("/innerpage", authentication.auth, (req, res) => {
   res.send("<h1>Innerpage</h1> <a href='/dashboard'>DashBoard</a>");
 });
 
 // User LogOut
-router.get("/logout", auth, authContoller.userLogOut);
+router.get("/logout", authentication.auth, authContoller.userLogOut);
 
 module.exports = router;
