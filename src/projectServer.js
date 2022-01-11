@@ -2,7 +2,7 @@
 require('dotenv').config()
 const express = require('express');
 const path = require('path');
-const hbs = require('hbs');
+// const hbs = require('ejs');
 const cookieParser = require("cookie-parser");
 
 // import custome node modules, and store exported objects by module into constant variable:
@@ -13,13 +13,12 @@ const app1Router = require("./routes/app1Route");
 const mainServer = express();
 const port = process.env.PORT || 3006;
 const staticPath = path.join(__dirname, "../public");
-const viewsPath = path.join(__dirname, "../templates/views");
-const partialsPath = path.join(__dirname, "../templates/partials");
+const mediaPath = path.join(__dirname, "../media");
 
 //setting project's main server configuration:
-mainServer.set('views', viewsPath); // set view path
-mainServer.set("view engine", "hbs") // set view engine
-hbs.registerPartials(partialsPath); // set partials view path
+// mainServer.set('views', viewsPath); // set view path
+mainServer.set("view engine", "ejs") // set view engine
+// hbs.registerPartials(partialsPath); // set partials view path
 
 // middlewares
 mainServer.use(cookieParser()) // middleware to parse cookies

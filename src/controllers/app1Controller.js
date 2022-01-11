@@ -1,5 +1,7 @@
-const UserModel = require("../models/userSchema");
 const bcrypt = require("bcryptjs");
+
+const UserModel = require("../models/userSchema");
+const ProductModel = require("../models/productSchema");
 
 const userRegistrationGet = (req, res) => {
   res.render("register");
@@ -44,7 +46,6 @@ const userLoginPost = async (req, res) => {
       console.log("Email and Password matched!");
       // midddleware to generate token.
       const tokenCreated = await fetchedUserDocument.generateToken();
-      console.log("Hoi", tokenCreated);
       // store token in cookies.
       res.cookie("myJwt", tokenCreated, {
         httpOnly: true,
@@ -73,10 +74,38 @@ const userLogOut = async (req, res) => {
   }
 };
 
+const addTarkariGet = (req, res) => {
+  res.render("add_tarkari")
+}
+
+const addTarkariPost = async (req, res) => {
+  console.log(req.file.filename)
+  const productObj = new ProductModel({
+    product_name: req.body.product_name,
+    rate: req.body.rate,
+    description: req.body.description,
+    views: 0,
+    image: "images/uploadedImages/"+req.file.filename
+  });
+  await productObj.save();
+  console.log("Tarkari Added!");
+  res.redirect("/");
+};
+
+const dashBoard = async (req, res) => {
+  const products = await ProductModel.find();
+  const username = req.user.username;
+  params = {products, username}
+  res.render("dashboard", params);
+}
+
 module.exports = {
   userRegistrationGet,
   userRegistrationPost,
   userLoginGet,
   userLoginPost,
   userLogOut,
+  addTarkariGet,
+  addTarkariPost,
+  dashBoard
 };

@@ -1,3 +1,4 @@
+const emailValidator = require("email-validator");
 const User = require("../models/userSchema");
 
 const validation = async (req, res, next) => {
@@ -5,28 +6,28 @@ const validation = async (req, res, next) => {
     const formPassword = req.body.password;
     const formConfirmPassword = req.body.cpassword;
     const formEmail = req.body.email;
-
     const user = await User.findOne({email: formEmail})
-    if(user){
+
+    if(user == null && emailValidator.validate(formEmail) == false){
         console.log("Invalid Email !")
-        res.redirect("/register")
+        res.render("register")
+        console.log("Hi again")
     }
-
-    if(formMobile.match(/^\d{10}$/) === null){
+    else if(formMobile.match(/^\d{10}$/) === null){
         console.log("Mobile number must have exact 10 integers !")
-        res.redirect("/register")
+        res.render("register")
     }
-
-    if(formPassword.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/) === null){
+    else if(formPassword.match(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{6,20}$/) === null){
         console.log("Password must have 6 to 20 characters which contain at least one numeric digit, one uppercase and one lowercase letter !")
-        res.redirect("/register")
+        res.render("register")
     }
-
-    if(formPassword != formConfirmPassword){
+    else if(formPassword != formConfirmPassword){
         console.log("Password and Confirm Password doesn't match !")
-        res.redirect("/register")
+        res.render("register")
     }
-    next()
+    else{
+        next()
+    }
 }
 
 module.exports = validation

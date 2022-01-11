@@ -13,13 +13,11 @@
   <body>
       <div class="container-fluid">
 
-            {{!-- navbar --}}
-            {{>navbar}}
+        <%- include('partials/navbar.ejs') %>
 
             <div class="container">
                 <h1 class="mt-4">Login Credentials</h1>
 
-                {{!-- login form --}}
                 <form action="/register" method="POST">
                   <div class="row">
                     <div class="col mb-3">
