@@ -5,12 +5,10 @@ const storage = multer.diskStorage({
     cb(null, "./public/images/uploadedImages/")
   },
   filename: (req, file, cb) => {
-    console.log(file)
-    // cb(null, Date.now() + path.extname(file.originalname))
     cb(null, Date.now() + path.extname(file.originalname))
   }
 })
 
-const upload = multer({storage: storage}).single("image")
+const upload = multer({storage: storage})
 
 module.exports = upload;

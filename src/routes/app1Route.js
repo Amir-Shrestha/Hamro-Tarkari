@@ -44,6 +44,9 @@ router.get("/logout", authentication.auth, appContoller.userLogOut);
 
 //Post CRUD
 router.get("/add_tarkari", appContoller.addTarkariGet)
-router.post("/add_tarkari", upload, appContoller.addTarkariPost)
+router.post("/add_tarkari", upload.single("vegImage"), appContoller.addTarkariPost)
+router.get("/delete_tarkari/:pid", appContoller.deleteTarkariPost)
+router.get("/update_tarkari/:pid", appContoller.updateTarkariGet)
+router.put("/update_tarkari/:pid", upload.single("vegImage"), appContoller.updateTarkariPut)
 
 module.exports = router;

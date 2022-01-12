@@ -79,13 +79,12 @@ const addTarkariGet = (req, res) => {
 }
 
 const addTarkariPost = async (req, res) => {
-  console.log(req.file.filename)
   const productObj = new ProductModel({
     product_name: req.body.product_name,
     rate: req.body.rate,
     description: req.body.description,
     views: 0,
-    image: "images/uploadedImages/"+req.file.filename
+    image: "/images/uploadedImages/"+req.file.filename
   });
   await productObj.save();
   console.log("Tarkari Added!");
@@ -94,9 +93,31 @@ const addTarkariPost = async (req, res) => {
 
 const dashBoard = async (req, res) => {
   const products = await ProductModel.find();
-  const username = req.user.username;
-  params = {products, username}
+  params = {products}
   res.render("dashboard", params);
+}
+
+const deleteTarkariPost = async (req, res) => {
+  await ProductModel.deleteOne({_id:req.params.pid });
+  res.redirect("/dashboard")
+}
+
+const updateTarkariGet = async (req, res) => {
+  const product = await ProductModel.findById(req.params.pid);
+  res.render("update_tarkari", {product})
+}
+
+const updateTarkariPut = async (req, res) => {
+  const product = await ProductModel.findByIdAndUpdate(req.params.pid, {
+    product_name: req.body.product_name,
+    rate: req.body.rate,
+    description: req.body.description
+  });
+  if(req.file){
+    product.image = "/images/uploadedImages/" + req.file.filename
+  }
+  await product.save();
+  res.redirect("/dashboard");
 }
 
 module.exports = {
@@ -107,5 +128,8 @@ module.exports = {
   userLogOut,
   addTarkariGet,
   addTarkariPost,
-  dashBoard
+  dashBoard,
+  deleteTarkariPost,
+  updateTarkariGet,
+  updateTarkariPut
 };
