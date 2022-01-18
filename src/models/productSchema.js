@@ -25,8 +25,8 @@ const productSchemaObj = new mongooseObj.Schema({
 
 // 4. Create collection using above schema.
 // - define model of collection(class)
-const ProductClass = new mongooseObj.model("productCollection", productSchemaObj);
-module.exports = ProductClass;
+const ProductModel = new mongooseObj.model("productCollection", productSchemaObj);
+module.exports = ProductModel;
 
 
 // // (generateToken as middleware) to generate tokens

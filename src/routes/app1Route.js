@@ -8,16 +8,14 @@ const ProductModel = require("../models/productSchema");
 
 router.get("/", async (req, res) => {
   const products = await ProductModel.find();
-  const username = "Amir";
-  params = {products, username}
-  res.render("home", params);
+  res.render("home", {products});
 });
 
-router.get("/about", (req, res) => {
+router.get("/about", async (req, res) => {
   res.render("about");
 });
 
-router.get("/service", (req, res) => {
+router.get("/service", async (req, res) => {
   res.render("service");
 });
 
@@ -25,28 +23,29 @@ router.get("/service", (req, res) => {
 router
   .route("/register")
   .get(authentication.logAuth, appContoller.userRegistrationGet)
-  .post(authentication.logAuth, validation, appContoller.userRegistrationPost);
+  .post(appContoller.userRegistrationPost);////****************************************** */
 
 // User LogIn
 router
   .route("/login")
   .get(authentication.logAuth, appContoller.userLoginGet)
-  .post(authentication.logAuth, appContoller.userLoginPost);
+  .post(appContoller.userLoginPost);
 
-router.get("/dashboard", authentication.auth, appContoller.dashBoard);
+router.get("/dashboard", authentication.adminAuth, appContoller.dashBoard);
+router.get("/profile", authentication.clientAuth, appContoller.profile);
 
-router.get("/innerpage", authentication.auth, (req, res) => {
+router.get("/innerpage", authentication.roleAuth, (req, res) => {
   res.send("<h1>Innerpage</h1> <a href='/dashboard'>DashBoard</a>");
 });
 
 // User LogOut
-router.get("/logout", authentication.auth, appContoller.userLogOut);
+router.get("/logout", authentication.roleAuth, appContoller.userLogOut);
 
 //Post CRUD
-router.get("/add_tarkari", appContoller.addTarkariGet)
+router.get("/add_tarkari", authentication.adminAuth, appContoller.addTarkariGet)
 router.post("/add_tarkari", upload.single("vegImage"), appContoller.addTarkariPost)
-router.get("/delete_tarkari/:pid", appContoller.deleteTarkariPost)
-router.get("/update_tarkari/:pid", appContoller.updateTarkariGet)
+router.get("/delete_tarkari/:pid", authentication.adminAuth, appContoller.deleteTarkariPost)
+router.get("/update_tarkari/:pid", authentication.adminAuth, appContoller.updateTarkariGet)
 router.put("/update_tarkari/:pid", upload.single("vegImage"), appContoller.updateTarkariPut)
 
 module.exports = router;

@@ -4,10 +4,12 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require("cookie-parser");
 const methodOverride = require("method-override");
+const jwt = require("jsonwebtoken");
 
 // import custome node modules, and store exported objects by module into constant variable:
 require("./db/conn.js")
 const app1Router = require("./routes/app1Route");
+const UserClass = require("./models/userSchema");
 
 // create constant variable: app_variable, port_variable, path_variable
 const mainServer = express();
@@ -15,13 +17,31 @@ const port = process.env.PORT || 3006;
 const staticPath = path.join(__dirname, "../public");
 
 //setting project's main server configuration:
+mainServer.engine('ejs', require('express-ejs-extend'));
 mainServer.set("view engine", "ejs") // set view engine
+
 
 // middlewares
 mainServer.use(cookieParser()) // middleware to parse cookies
 mainServer.use(express.urlencoded({extended: false}));// get form data
 mainServer.use(methodOverride('_method')); // form PUT method
+
+// check and send user on every request
+mainServer.use( async (req, res, next) => {
+    try {
+        const myjwt = req.cookies.myJwt;
+        const cookieUserToken = jwt.verify(myjwt, process.env.SECRET_KEY)
+        const user = await UserClass.findOne({_id: cookieUserToken._id});
+        res.locals.user = user;
+    } catch (error) {
+        console.log("JsonWebTokenError: jwt must be provided")
+        res.locals.user = "";
+    }
+    next()
+})
+
 mainServer.use('/', app1Router);// calling route of app1
+
 mainServer.use(express.static(staticPath));//  built-in express middleware to show static views.
 
 //listen to imcomming requested port

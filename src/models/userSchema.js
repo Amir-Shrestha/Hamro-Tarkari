@@ -30,28 +30,20 @@ const userSchemaObj = new mongooseObj.Schema({
     type: Date,
     default: Date.now,
   },
-  role: String,
-  tokens: [
-    {
-      token: {
-        type: String,
-        required: true,
-      },
-    },
-  ],
+  role: {
+    type: String,
+    enum: ["Admin", "Client"],
+    default: "Client"
+  }
 });
 
 
 // (generateToken as middleware) to generate tokens
-userSchemaObj.methods.generateToken = async function () {
+userSchemaObj.methods.generateToken = async function (res) {
   try {
-    const tokenCreated = await jwt.sign(
-      { _id: this._id.toString() },
-      process.env.SECRET_KEY
-    );
-    this.tokens = this.tokens.concat({ token: tokenCreated });
+    const tokenCreated = await jwt.sign({ _id: this._id.toString() }, process.env.SECRET_KEY );
     await this.save();
-    return tokenCreated;
+    return tokenCreated; // just token only
   } catch (error) {
     res.send("Error:", error);
     console.log("Error:", error);
@@ -63,11 +55,14 @@ userSchemaObj.methods.generateToken = async function () {
 userSchemaObj.pre("save", async function () {
   if (this.isModified("password")) {
     this.password = await bcrypt.hash(this.password, 10);
+    if (this.email === process.env.ADMIN_EMAIL.toLowerCase()){
+      this.role = "Admin";
+    }
   }
 });
 
 
 // 4. Create collection using above schema.
 // - define model of collection(class)
-const UserClass = new mongooseObj.model("userCollection", userSchemaObj);
-module.exports = UserClass;
+const UserModel = new mongooseObj.model("userCollection", userSchemaObj);
+module.exports = UserModel;
